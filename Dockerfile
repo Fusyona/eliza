@@ -51,5 +51,8 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/characters ./characters
 
+ENV CHARACTERNAME "default_character"
+CMD ["sh", "-c", "exec pnpm start --characters=characters/${CHARACTERNAME}.character.json"]
+
 # Set the command to run the application
-CMD ["pnpm", "start"]
+#CMD ["pnpm", "start", "--characters=\"characters/nova.character.json\""]

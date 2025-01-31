@@ -1,5 +1,6 @@
 services:
     tee:
+        #image: eliza-tee:latest
         build:
             context: .
             dockerfile: Dockerfile
@@ -10,7 +11,6 @@ services:
             - tee:/app/packages/client-twitter/src/tweetcache
             - tee:/app/db.sqlite
         environment:
-            - OPENAI_API_KEY=
             - REDPILL_API_KEY=
             - ELEVENLABS_XI_API_KEY=
             - ELEVENLABS_MODEL_ID=eleven_multilingual_v2
@@ -22,9 +22,32 @@ services:
             - ELEVENLABS_OPTIMIZE_STREAMING_LATENCY=4
             - ELEVENLABS_OUTPUT_FORMAT=pcm_16000
             - TWITTER_DRY_RUN=false
-            - TWITTER_USERNAME=
-            - TWITTER_PASSWORD=
-            - TWITTER_EMAIL=
+
+            # Twitter configuration
+            - TWITTER_USERNAME=${TWITTER_USERNAME}
+            - TWITTER_PASSWORD=${TWITTER_PASSWORD}
+            - TWITTER_EMAIL=${TWITTER_EMAIL}
+
+            - TWITTER_POLL_INTERVAL=${TWITTER_POLL_INTERVAL} # How often (in seconds) the bot should check for interactions
+            - TWITTER_SEARCH_ENABLE=FALSE # Enable timeline search, WARNING this greatly increases your chance of getting banned
+            - TWITTER_TARGET_USERS=${TWITTER_TARGET_USERS} # Comma separated list of Twitter user names to interact with
+            - TWITTER_RETRY_LIMIT=${TWITTER_RETRY_LIMIT} # Maximum retry attempts for Twitter login
+
+            # Post Interval Settings (in minutes)
+            - POST_INTERVAL_MIN=${POST_INTERVAL_MIN} # Default: 90
+            - POST_INTERVAL_MAX=${POST_INTERVAL_MAX} # Default: 180
+            - POST_IMMEDIATELY=true
+
+              # Discord Configuration
+            - DISCORD_APPLICATION_ID=${DISCORD_APPLICATION_ID}
+            - DISCORD_API_TOKEN=${DISCORD_API_TOKEN}
+
+            # Telegram Configuration
+            - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+
+            # Openai Configuration
+            - OPENAI_API_KEY=${OPENAI_API_KEY}
+
             - X_SERVER_URL=https://api.red-pill.ai/v1
             - BIRDEYE_API_KEY=
             - SOL_ADDRESS=So11111111111111111111111111111111111111112
@@ -33,8 +56,9 @@ services:
             - HELIUS_API_KEY=
             - SERVER_PORT=3000
             - WALLET_SECRET_SALT=secret_salt
+            - CHARACTERNAME=${CHARACTERNAME}
         ports:
-            - "3000:80"
+            - ${PORT1}:80"
         restart: always
 
 volumes:
