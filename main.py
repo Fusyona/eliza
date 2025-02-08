@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Request
 import subprocess
 import docker
-
+import data_mapper
+import os
 import logging
+import json
 
 app = FastAPI()
 client = docker.from_env()
@@ -24,6 +26,10 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     return response
 
+# Directory to store character files
+CHARACTER_DIR = "characters"
+os.makedirs(CHARACTER_DIR, exist_ok=True)
+
 
 @app.post("/run-container/")
 async def run_container(payload: dict):
@@ -39,21 +45,29 @@ async def run_container(payload: dict):
 
         # Extract secrets and other environment variables
         env_vars = assistant_data.get("settings", {}).get("secrets", {})
-        name = assistant_data.get("name", "")
-
-        # Additional configs
-        telegram_token = assistant_data.get("telegramConfig", {}).get("botToken", "")
-        openai_api_key = assistant_data.get("openAiConfig", {}).get("apiKey", "")
-        port = assistant_data.get("serverConfig", {}).get("port", "3000")
+        character_name = assistant_data.get("name", "")
+        
+        character_data = data_mapper.get_character(assistant_data)
+        print(character_data)
+        # Save character data as JSON
+        character_file = os.path.join(CHARACTER_DIR, f"{character_name}.character.json")
+        with open(character_file, "w", encoding="utf-8") as f:
+            json.dump(character_data, f, indent=4, ensure_ascii=False)
+        logger.info(f"✅ Character '{character_name}' (ID: {character_name}) saved successfully")
+        
+        # Get enviroment variables
+        env = data_mapper.get_env(assistant_data)
+        print(env)
 
         # Construct the environment variable string
-        env_string = " ".join([f"{key}={value}" for key, value in env_vars.items()])
+        env_string = " ".join([f'{key}="{value}"' for key, value in env.items()])
+        print(env_string)
 
         # Construct Docker Compose command
-        command = f"sudo {env_string} OPENAI_API_KEY={openai_api_key} TELEGRAM_BOT_TOKEN={telegram_token} CHARACTERNAME={name} PORT1={port} docker-compose -p eliza-{name} up -d"
+        command = f"sudo {env_string} CHARACTERNAME={character_name} docker-compose -p eliza-{character_name} up -d"
         
         logger.info(f"Executing command: {command}")
-        # print(command)
+        print(command)
 
         # Execute command
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -63,8 +77,8 @@ async def run_container(payload: dict):
             logger.error(f"Error running container: {stderr.decode()}")
             raise HTTPException(status_code=500, detail=f"Error running container: {stderr.decode()}")
 
-        logger.info(f"Container for {name} started successfully")
-        return {"message": f"Container for {name} started successfully", "output": stdout.decode()}
+        logger.info(f"Container for {character_name} started successfully")
+        return {"message": f"Container for {character_name} started successfully", "output": stdout.decode()}
 
     except Exception as e:
         logger.error(f"Exception occurred: {str(e)}", exc_info=True)
