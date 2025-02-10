@@ -46,28 +46,30 @@ async def run_container(payload: dict):
         # Extract secrets and other environment variables
         env_vars = assistant_data.get("settings", {}).get("secrets", {})
         character_name = assistant_data.get("name", "")
+        user_id = assistant_data.get("userId", "")
+        id = assistant_data.get("id", "")
+        
         
         character_data = data_mapper.get_character(assistant_data)
-        print(character_data)
+        
         # Save character data as JSON
-        character_file = os.path.join(CHARACTER_DIR, f"{character_name}.character.json")
+        user_folder = os.path.join(CHARACTER_DIR, f"{user_id}")
+        character_file = os.path.join(CHARACTER_DIR, f"{user_id}/{id}.character.json")
+        os.makedirs(user_folder, exist_ok=True)
         with open(character_file, "w", encoding="utf-8") as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
         logger.info(f"✅ Character '{character_name}' (ID: {character_name}) saved successfully")
         
         # Get enviroment variables
         env = data_mapper.get_env(assistant_data)
-        print(env)
 
         # Construct the environment variable string
         env_string = " ".join([f'{key}="{value}"' for key, value in env.items()])
-        print(env_string)
 
         # Construct Docker Compose command
-        command = f"sudo {env_string} CHARACTERNAME={character_name} docker-compose -p eliza-{character_name} up -d"
+        command = f"sudo {env_string} CHARACTERNAME={user_id}/{id} docker-compose -p eliza-{user_id}-{id} up -d"
         
         logger.info(f"Executing command: {command}")
-        print(command)
 
         # Execute command
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
