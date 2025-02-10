@@ -1,6 +1,6 @@
 services:
     tee:
-        #image: eliza-tee:latest
+        image: eliza-copy:latest
         build:
             context: .
             dockerfile: Dockerfile
@@ -10,6 +10,7 @@ services:
             - /var/run/tappd.sock:/var/run/tappd.sock
             - tee:/app/packages/client-twitter/src/tweetcache
             - tee:/app/db.sqlite
+            - ./characters:/app/characters/
         environment:
             - REDPILL_API_KEY=
             - ELEVENLABS_XI_API_KEY=
@@ -27,6 +28,7 @@ services:
             - TWITTER_USERNAME=${TWITTER_USERNAME}
             - TWITTER_PASSWORD=${TWITTER_PASSWORD}
             - TWITTER_EMAIL=${TWITTER_EMAIL}
+            - TWITTER_2FA_SECRET=${TWITTER_2FA_SECRET}
 
             - TWITTER_POLL_INTERVAL=${TWITTER_POLL_INTERVAL} # How often (in seconds) the bot should check for interactions
             - TWITTER_SEARCH_ENABLE=FALSE # Enable timeline search, WARNING this greatly increases your chance of getting banned
@@ -47,6 +49,7 @@ services:
 
             # Openai Configuration
             - OPENAI_API_KEY=${OPENAI_API_KEY}
+            - USE_OPENAI_EMBEDDING=true
 
             - X_SERVER_URL=https://api.red-pill.ai/v1
             - BIRDEYE_API_KEY=
@@ -58,7 +61,7 @@ services:
             - WALLET_SECRET_SALT=secret_salt
             - CHARACTERNAME=${CHARACTERNAME}
         ports:
-            - ${PORT1}:80"
+            - ${PORT1}:${PORT1}
         restart: always
 
 volumes:
