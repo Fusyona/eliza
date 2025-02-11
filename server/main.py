@@ -31,7 +31,7 @@ async def log_requests(request: Request, call_next):
 
 # Directory to store character files
 CHARACTER_DIR = "../characters"
-DOCKER_COMPOSE_PATH = "../docker-compose.yaml"
+DOCKER_COMPOSE_PATH = "../docker-compose-server.yaml"
 os.makedirs(CHARACTER_DIR, exist_ok=True)
 
 
@@ -42,10 +42,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={"detail": exc.errors()},
 )
-    
+
 @app.post("/run-container/")
 async def run_container(payload: RequestPayload):
-            
+
     try:
         # clients = payload.clients
         action = payload.action
@@ -61,9 +61,9 @@ async def run_container(payload: RequestPayload):
         character_name = assistant_data.name
         user_id = assistant_data.userId
         id = assistant_data.id
-        
+
         character_data = data_mapper.get_character(assistant_data.dict())
-        
+
         # Save character data as JSON
         user_folder = os.path.join(CHARACTER_DIR, f"{user_id}")
         character_file = os.path.join(CHARACTER_DIR, f"{user_id}/{id}.character.json")
@@ -71,7 +71,7 @@ async def run_container(payload: RequestPayload):
         with open(character_file, "w", encoding="utf-8") as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
         logger.info(f"✅ Character '{character_name}' (ID: {character_name}) saved successfully")
-        
+
         # Get enviroment variables
         env = data_mapper.get_env(assistant_data.dict())
         container_name = f"eliza-{user_id}-{id}"
@@ -83,7 +83,7 @@ async def run_container(payload: RequestPayload):
 
         # Construct Docker Compose command
         command = f"sudo {env_string} PORT1={port} CHARACTERNAME={user_id}/{id} docker-compose -f {DOCKER_COMPOSE_PATH} -p {container_name} up -d"
-        
+
         logger.info(f"Executing command: {command}")
 
         # Execute command
@@ -109,7 +109,7 @@ async def stop_container(payload: StopContainerRequest):
 
         # Check if the container is running
         status = get_container_status(container_name)
-        
+
         if status == "not found":
             logger.warning(f"⚠️ Container '{container_name}' not found.")
             raise HTTPException(status_code=404, detail=f"Container '{container_name}' not found.")
@@ -133,7 +133,7 @@ async def stop_container(payload: StopContainerRequest):
     except Exception as e:
         logger.error(f"🔥 Error stopping container: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 # 🔹 Function to Check Container Status
 def get_container_status(container_name: str) -> str:
     """Returns the status of a Docker container: 'running', 'stopped', or 'not found'."""
@@ -143,7 +143,7 @@ def get_container_status(container_name: str) -> str:
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         status = result.stdout.decode().strip()
-        
+
         if not status:
             return "not found"
         return status

@@ -1,8 +1,0 @@
-FROM eliza-tee
-
-WORKDIR /app
-
-
-ENV CHARACTERNAME "default_character"
-CMD ["sh", "-c", "exec pnpm start --character=/app/characters/${CHARACTERNAME}.character.json"]
-# CMD ["sh", "-c", "cp /characters/${CHARACTERNAME}.character.json characters/${CHARACTERNAME}.character.json && exec pnpm start --chasddsdracters=characters/${CHARACTERNAME}.character.json"]

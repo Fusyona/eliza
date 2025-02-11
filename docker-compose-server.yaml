@@ -3,7 +3,7 @@ services:
         image: eliza-tee:latest
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile-server
         stdin_open: true
         tty: true
         volumes:
