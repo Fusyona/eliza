@@ -3,7 +3,7 @@ import subprocess
 from fastapi.exceptions import RequestValidationError
 import docker
 import data_mapper
-from validators import RequestPayload
+from validators import RequestPayload, StopContainerRequest
 import os
 import logging
 import json
@@ -41,6 +41,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={"detail": exc.errors()},
 )
+    
 @app.post("/run-container/")
 async def run_container(payload: RequestPayload):
             
@@ -59,7 +60,6 @@ async def run_container(payload: RequestPayload):
         character_name = assistant_data.name
         user_id = assistant_data.userId
         id = assistant_data.id
-        print(assistant_data.dict())
         
         character_data = data_mapper.get_character(assistant_data.dict())
         
@@ -94,9 +94,59 @@ async def run_container(payload: RequestPayload):
             raise HTTPException(status_code=500, detail=f"Error running container: {stderr.decode()}")
 
         logger.info(f"Container for {character_name} started successfully")
-        return {"message": f"Container for {character_name} started successfully", "output": stdout.decode()}
+        return {"message": f"Container for {character_name} started successfully", "output": stdout.decode(), "container_name" : f"{container_name}"}
 
     except Exception as e:
         logger.error(f"Exception occurred: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/stop-container/")
+async def stop_container(payload: StopContainerRequest):
+    try:
+        container_name = payload.container_name
+        logger.info(f"📩 Received request to stop container: {container_name}")
+
+        # Check if the container is running
+        status = get_container_status(container_name)
+        
+        if status == "not found":
+            logger.warning(f"⚠️ Container '{container_name}' not found.")
+            raise HTTPException(status_code=404, detail=f"Container '{container_name}' not found.")
+
+        if status == "exited" or status == "stopped":
+            logger.info(f"✅ Container '{container_name}' is already stopped.")
+            return {"message": f"Container '{container_name}' is already stopped."}
+
+        # If container is running, stop it
+        command = f"sudo docker-compose -p {container_name} down"
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+        if process.returncode != 0:
+            logger.error(f"❌ Failed to stop container {container_name}: {stderr.decode()}")
+            raise HTTPException(status_code=500, detail=f"Error stopping container: {stderr.decode()}")
+
+        logger.info(f"✅ Container {container_name} stopped successfully")
+        return {"message": f"Container {container_name} stopped successfully"}
+
+    except Exception as e:
+        logger.error(f"🔥 Error stopping container: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+# 🔹 Function to Check Container Status
+def get_container_status(container_name: str) -> str:
+    """Returns the status of a Docker container: 'running', 'stopped', or 'not found'."""
+    try:
+        # Get the container status using `docker ps -a`
+        command = f"sudo docker ps -a --filter 'name={container_name}' --format '{{{{.State}}}}'"
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        status = result.stdout.decode().strip()
+        
+        if not status:
+            return "not found"
+        return status
+
+    except Exception as e:
+        logger.error(f"🔥 Error checking container status: {str(e)}")
+        return "error"

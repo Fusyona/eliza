@@ -89,7 +89,7 @@ class AssistantData(BaseModel):
     
     @field_validator("twitterConfig", mode="before")
     @classmethod
-    def validate_telegram(cls, v, values):
+    def validate_twitter(cls, v, values):
         """If 'twitter' is a client then twitterConfig is mandatory"""
         if "clients" in values and "twitter" in values["clients"] and v is None:
             raise ValueError("If 'twitter' is a client then telegramConfig is mandatory.")
@@ -97,7 +97,7 @@ class AssistantData(BaseModel):
     
     @field_validator("discordConfig", mode="before")
     @classmethod
-    def validate_telegram(cls, v, values):
+    def validate_discord(cls, v, values):
         """If 'discord' is a client then discordConfig is mandatory"""
         if "clients" in values and "discord" in values["clients"] and v is None:
             raise ValueError("If 'discord' is a client then discordConfig is mandatory.")
@@ -110,3 +110,6 @@ class RequestPayload(BaseModel):
     data: AssistantData
     params: Optional[Dict[str, str]] = None
     timestamp: str = Field(..., example="2025-02-05T12:00:00Z")
+    
+class StopContainerRequest(BaseModel):
+    container_name: str = Field(..., example="twitter-project")
