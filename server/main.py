@@ -30,7 +30,8 @@ async def log_requests(request: Request, call_next):
     return response
 
 # Directory to store character files
-CHARACTER_DIR = "characters"
+CHARACTER_DIR = "../characters"
+DOCKER_COMPOSE_PATH = "../docker-compose.yaml"
 os.makedirs(CHARACTER_DIR, exist_ok=True)
 
 
@@ -81,7 +82,7 @@ async def run_container(payload: RequestPayload):
 
 
         # Construct Docker Compose command
-        command = f"sudo {env_string} PORT1={port} CHARACTERNAME={user_id}/{id} docker-compose -p {container_name} up -d"
+        command = f"sudo {env_string} PORT1={port} CHARACTERNAME={user_id}/{id} docker-compose -f {DOCKER_COMPOSE_PATH} -p {container_name} up -d"
         
         logger.info(f"Executing command: {command}")
 
@@ -118,7 +119,7 @@ async def stop_container(payload: StopContainerRequest):
             return {"message": f"Container '{container_name}' is already stopped."}
 
         # If container is running, stop it
-        command = f"sudo docker-compose -p {container_name} down"
+        command = f"sudo docker-compose  -f {DOCKER_COMPOSE_PATH} -p {container_name} down"
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 

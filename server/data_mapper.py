@@ -40,7 +40,6 @@ def get_character(data):
     return character
     
 character_attributes = [
-    "id", 
     "name" ,
     "clients" ,
     "modelProvider" ,
@@ -49,7 +48,6 @@ character_attributes = [
     "bio" ,
     "lore" ,
     "knowledge" ,
-    "userId" ,
     "messageExamples" ,
     'postExamples' ,
     "topics" ,

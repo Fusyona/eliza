@@ -1,6 +1,7 @@
 
 from pydantic import BaseModel, Field, field_validator
 from typing import Dict, Optional
+from pydantic_core.core_schema import ValidationInfo
 
 class AssistantSettings(BaseModel):
     secrets: Optional[Dict[str, str]] = None
@@ -52,7 +53,7 @@ class AssistantStyle(BaseModel):
     post: Optional[list[str]] = []
 
 class AssistantData(BaseModel):
-    modelProvider: Optional[str] = ""
+    modelProvider: Optional[str] = "openai"
     plugins: Optional[list[str]] = []
     bio: Optional[list[str]] = []
     lore: Optional[list[str]] = []
@@ -81,25 +82,25 @@ class AssistantData(BaseModel):
 
     @field_validator("telegramConfig", mode="before")
     @classmethod
-    def validate_telegram(cls, v, values):
+    def validate_telegram(cls, v, values: ValidationInfo):
         """If 'telegram' is a client then telegramConfig is mandatory"""
-        if "clients" in values and "telegram" in values["clients"] and v is None:
+        if "clients" in values.data and "telegram" in values.data["clients"] and v is None:
             raise ValueError("If 'telegram' is a client then telegramConfig is mandatory.")
         return v
     
     @field_validator("twitterConfig", mode="before")
     @classmethod
-    def validate_twitter(cls, v, values):
+    def validate_twitter(cls, v, values: ValidationInfo):
         """If 'twitter' is a client then twitterConfig is mandatory"""
-        if "clients" in values and "twitter" in values["clients"] and v is None:
+        if "clients" in values.data and "twitter" in values.data["clients"] and v is None:
             raise ValueError("If 'twitter' is a client then telegramConfig is mandatory.")
         return v
     
     @field_validator("discordConfig", mode="before")
     @classmethod
-    def validate_discord(cls, v, values):
+    def validate_discord(cls, v, values: ValidationInfo):
         """If 'discord' is a client then discordConfig is mandatory"""
-        if "clients" in values and "discord" in values["clients"] and v is None:
+        if "clients" in values.data and "discord" in values.data["clients"] and v is None:
             raise ValueError("If 'discord' is a client then discordConfig is mandatory.")
         return v
     
