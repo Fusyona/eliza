@@ -95,7 +95,7 @@ class AssistantData(BaseModel):
             raise ValueError("If 'twitter' is a client then telegramConfig is mandatory.")
         return v
     
-    @field_validator("telegramConfig", mode="before")
+    @field_validator("discordConfig", mode="before")
     @classmethod
     def validate_telegram(cls, v, values):
         """If 'discord' is a client then discordConfig is mandatory"""

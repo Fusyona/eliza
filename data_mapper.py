@@ -1,3 +1,5 @@
+import json
+
 def get_env(data):
     env = {}
     
@@ -7,6 +9,26 @@ def get_env(data):
                 if (key3 := config_mapping.get(key, {}).get(key2, None)) != None:
                     env[key3] = value2
     return env
+
+def get_port(container_name):
+    path = "container_ports.json"
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if data.get(container_name,None):
+        return data[container_name]
+    
+    print(data)
+    
+    for i in range(3000,40000):
+        if i not in data.values():
+            data[container_name] = i
+            break
+    with open(path, "w", encoding="utf-8") as f:
+        data = json.dump(data, f, indent=4, ensure_ascii=False)
+    return data[container_name]
+    
+    
+    
 
 def get_character(data):
     

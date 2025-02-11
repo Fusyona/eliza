@@ -73,12 +73,15 @@ async def run_container(payload: RequestPayload):
         
         # Get enviroment variables
         env = data_mapper.get_env(assistant_data.dict())
+        container_name = f"eliza-{user_id}-{id}"
+        port = data_mapper.get_port(container_name)
 
         # Construct the environment variable string
         env_string = " ".join([f'{key}="{value}"' for key, value in env.items()])
 
+
         # Construct Docker Compose command
-        command = f"sudo {env_string} CHARACTERNAME={user_id}/{id} docker-compose -p eliza-{user_id}-{id} up -d"
+        command = f"sudo {env_string} PORT1={port} CHARACTERNAME={user_id}/{id} docker-compose -p {container_name} up -d"
         
         logger.info(f"Executing command: {command}")
 
