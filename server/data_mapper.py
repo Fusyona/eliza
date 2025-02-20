@@ -1,5 +1,12 @@
 import json
 
+def createContainerName(assistant_data):
+    
+    user_id = assistant_data.userId
+    id = assistant_data.id
+    
+    return f"eliza-{user_id}-{id}-{assistant_data.clients[0]}"
+
 def get_env(data):
     env = {}
     

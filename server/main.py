@@ -57,7 +57,6 @@ async def run_container(payload: RequestPayload):
             raise HTTPException(status_code=400, detail="Invalid client name or action")
 
         # Extract secrets and other environment variables
-        env_vars = assistant_data.settings.secrets
         character_name = assistant_data.name
         user_id = assistant_data.userId
         id = assistant_data.id
@@ -74,7 +73,7 @@ async def run_container(payload: RequestPayload):
 
         # Get enviroment variables
         env = data_mapper.get_env(assistant_data.dict())
-        container_name = f"eliza-{user_id}-{id}"
+        container_name = data_mapper.createContainerName(assistant_data)
         port = data_mapper.get_port(container_name)
 
         # Construct the environment variable string
@@ -104,8 +103,14 @@ async def run_container(payload: RequestPayload):
 @app.post("/stop-container/")
 async def stop_container(payload: StopContainerRequest):
     try:
-        container_name = payload.container_name
+        assistant_data = payload.data
+        action = payload.action
+        container_name = data_mapper.createContainerName(assistant_data)
         logger.info(f"📩 Received request to stop container: {container_name}")
+
+        if not assistant_data.clients or action != "stop":
+            logger.warning(f"Invalid action: {action}")
+            raise HTTPException(status_code=400, detail="Invalid client name or action")
 
         # Check if the container is running
         status = get_container_status(container_name)

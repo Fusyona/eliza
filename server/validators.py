@@ -106,6 +106,11 @@ class AssistantData(BaseModel):
     
 
 
+class StopContainerData(BaseModel):
+    id: str
+    userId: str
+    clients : list[str]
+    
 class RequestPayload(BaseModel):
     action: str = Field(..., example="start")
     data: AssistantData
@@ -113,4 +118,7 @@ class RequestPayload(BaseModel):
     timestamp: str = Field(..., example="2025-02-05T12:00:00Z")
     
 class StopContainerRequest(BaseModel):
-    container_name: str = Field(..., example="twitter-project")
+    action: str = Field(..., example="start")
+    data: StopContainerData
+    params: Optional[Dict[str, str]] = None
+    timestamp: str = Field(..., example="2025-02-05T12:00:00Z")
