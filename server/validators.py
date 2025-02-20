@@ -32,15 +32,15 @@ class TwitterActionProcessing(BaseModel):
 
     
 class TwitterConfig(BaseModel):
-    dryRun: bool
+    dryRun: bool = False
     credentials : TwitterCredentials
     pollInterval: Optional[int] = 120
     searchEnabled: Optional[bool] = False
-    targetUsers: Optional[str]
-    retryLimit: Optional[int]
+    targetUsers: Optional[str] = ""
+    retryLimit: Optional[int] = ""
     postInterval: Optional[TwitterPostInterval]
     postImmediately: Optional[bool]
-    actionProcessing: Optional[TwitterActionProcessing]
+    actionProcessing: Optional[TwitterActionProcessing] = TwitterActionProcessing() 
 
 class DiscordConfig(BaseModel):
     applicationId: str
@@ -58,7 +58,7 @@ class AssistantData(BaseModel):
     bio: Optional[list[str]] = []
     lore: Optional[list[str]] = []
     knowledge: Optional[list[str]] = []
-    messageExamples: Optional[list[Dict[str,object]]] = []
+    messageExamples: Optional[list[list[Dict[str,object]]]] = []
     postExamples: Optional[list[str]] = []
     topics: Optional[list[str]] = []
     style: Optional[AssistantStyle] = AssistantStyle()

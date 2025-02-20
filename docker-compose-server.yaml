@@ -10,7 +10,7 @@ services:
             - /var/run/tappd.sock:/var/run/tappd.sock
             - tee:/app/packages/client-twitter/src/tweetcache
             - tee:/app/db.sqlite
-            - ./characters:/app/characters/
+            - ./characters:/app/agent/characters/
         environment:
             - REDPILL_API_KEY=
             - ELEVENLABS_XI_API_KEY=

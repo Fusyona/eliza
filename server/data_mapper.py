@@ -1,4 +1,4 @@
-import json
+import json, os
 
 def createContainerName(assistant_data):
     
@@ -11,27 +11,39 @@ def get_env(data):
     env = {}
     
     for key,value in data.items():
+        
         if isinstance(value, dict):
             for key2, value2 in value.items():
-                if (key3 := config_mapping.get(key, {}).get(key2, None)) != None:
-                    env[key3] = value2
+                if isinstance(value2, dict):
+                    for key3, value3 in value2.items():    
+                        if (env_var_name := (config_mapping.get(key, {}).get(key2, {})).get(key3, None)) != None:
+                            env[env_var_name] = value3
+                elif (env_var_name := config_mapping.get(key, {}).get(key2, None)) != None:
+                    env[env_var_name] = value2
     return env
 
 def get_port(container_name):
     path = "container_ports.json"
+
+    # check if the file exists
+    if not os.path.exists(path):
+        # If not write an empty file
+        with open(path, 'w') as f:
+            json.dump({}, f) 
+            
+            
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    if data.get(container_name,None):
+    if data.get(container_name, None) != None:
         return data[container_name]
     
-    print(data)
     
     for i in range(3000,40000):
         if i not in data.values():
             data[container_name] = i
             break
     with open(path, "w", encoding="utf-8") as f:
-        data = json.dump(data, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, indent=4, ensure_ascii=False)
     return data[container_name]
     
     
