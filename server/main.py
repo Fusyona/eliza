@@ -124,7 +124,7 @@ async def stop_container(payload: StopContainerRequest):
             return {"message": f"Container '{container_name}' is already stopped."}
 
         # If container is running, stop it
-        command = f"sudo docker-compose  -f {DOCKER_COMPOSE_PATH} -p {container_name} down"
+        command = f"PORT1=3000 sudo docker-compose  -f {DOCKER_COMPOSE_PATH} -p {container_name} down"
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
