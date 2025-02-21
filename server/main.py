@@ -144,7 +144,7 @@ def get_container_status(container_name: str) -> str:
     """Returns the status of a Docker container: 'running', 'stopped', or 'not found'."""
     try:
         # Get the container status using `docker ps -a`
-        command = f"sudo docker ps -a --filter 'name={container_name}' --format '{{{{.State}}}}'"
+        command = f"PORT1=3000 sudo docker ps -a --filter 'name={container_name}' --format '{{{{.State}}}}'"
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         status = result.stdout.decode().strip()
