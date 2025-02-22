@@ -33,13 +33,13 @@ class TwitterActionProcessing(BaseModel):
     
 class TwitterConfig(BaseModel):
     dryRun: bool = False
-    credentials : TwitterCredentials
+    credentials : Optional[TwitterCredentials] = None
     pollInterval: Optional[int] = 120
     searchEnabled: Optional[bool] = False
-    targetUsers: Optional[str] = ""
-    retryLimit: Optional[int] = ""
-    postInterval: Optional[TwitterPostInterval]
-    postImmediately: Optional[bool]
+    targetUsers: Optional[str] = None
+    retryLimit: Optional[int] = None
+    postInterval: Optional[TwitterPostInterval] = None
+    postImmediately: Optional[bool] = None
     actionProcessing: Optional[TwitterActionProcessing] = TwitterActionProcessing() 
 
 class DiscordConfig(BaseModel):
@@ -64,7 +64,7 @@ class AssistantData(BaseModel):
     style: Optional[AssistantStyle] = AssistantStyle()
     adjectives: Optional[list[str]] = []
     people: Optional[list[str]] = []
-    previewImage: Optional[str] = ""
+    # previewImage: Optional[str] = ""
     readyPlayerMeURL: Optional[str]= ""
     
     clients: list[str] = Field(..., example=["twitter"])

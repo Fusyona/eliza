@@ -64,8 +64,9 @@ async def run_container(payload: RequestPayload):
         character_data = data_mapper.get_character(assistant_data.dict())
 
         # Save character data as JSON
-        user_folder = os.path.join(CHARACTER_DIR, f"{user_id}")
-        character_file = os.path.join(CHARACTER_DIR, f"{user_id}/{id}-{assistant_data.clients[0]}.character.json")
+        user_folder = os.path.join(CHARACTER_DIR, f"{user_id[-6:]}")
+        character_json_name = f"{user_id[-6:]}/{id[-6:]}-{assistant_data.clients[0]}"
+        character_file = os.path.join(CHARACTER_DIR, f"{character_json_name}.character.json")
         os.makedirs(user_folder, exist_ok=True)
         with open(character_file, "w", encoding="utf-8") as f:
             json.dump(character_data, f, indent=4, ensure_ascii=False)
@@ -81,7 +82,7 @@ async def run_container(payload: RequestPayload):
 
 
         # Construct Docker Compose command
-        command = f"sudo {env_string} PORT1={port} CHARACTERNAME={user_id}/{id}-{assistant_data.clients[0]} docker-compose -f {DOCKER_COMPOSE_PATH} -p {container_name} up -d"
+        command = f"sudo {env_string} PORT1={port} CHARACTERNAME={character_json_name} docker-compose -f {DOCKER_COMPOSE_PATH} -p {container_name} up -d"
 
         logger.info(f"Executing command: {command}")
 

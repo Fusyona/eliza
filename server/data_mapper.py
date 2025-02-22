@@ -5,7 +5,7 @@ def createContainerName(assistant_data):
     user_id = assistant_data.userId
     id = assistant_data.id
     
-    return f"eliza-{user_id}-{id}-{assistant_data.clients[0]}"
+    return f"eliza-{user_id[-6:]}-{id[-6:]}-{assistant_data.clients[0]}"
 
 def get_env(data):
     env = {}
@@ -18,7 +18,8 @@ def get_env(data):
                     for key3, value3 in value2.items():    
                         if (env_var_name := (config_mapping.get(key, {}).get(key2, {})).get(key3, None)) != None:
                             env[env_var_name] = value3
-                elif (env_var_name := config_mapping.get(key, {}).get(key2, None)) != None:
+                elif (env_var_name := config_mapping.get(key, {}).get(key2, None)) != None and value2 != None:
+                    print(env_var_name, key, key2, value2)
                     env[env_var_name] = value2
     return env
 
