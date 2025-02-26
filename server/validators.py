@@ -14,23 +14,23 @@ class OpenAIConfig(BaseModel):
 
 class TelegramConfig(BaseModel):
     botToken: str
-    
-    
+
+
 class TwitterCredentials(BaseModel):
     password: str
     email: str
     username: str
     twoFaSecret: str
-    
+
 class TwitterPostInterval(BaseModel):
     min: Optional[int] = 90
     max: Optional[int] = 180
-    
+
 class TwitterActionProcessing(BaseModel):
     interval : Optional[int] = 300000
     enabled  : Optional[bool] = False
 
-    
+
 class TwitterConfig(BaseModel):
     dryRun: bool = False
     credentials : Optional[TwitterCredentials] = None
@@ -40,13 +40,13 @@ class TwitterConfig(BaseModel):
     retryLimit: Optional[int] = None
     postInterval: Optional[TwitterPostInterval] = None
     postImmediately: Optional[bool] = None
-    actionProcessing: Optional[TwitterActionProcessing] = TwitterActionProcessing() 
+    actionProcessing: Optional[TwitterActionProcessing] = TwitterActionProcessing()
 
 class DiscordConfig(BaseModel):
     applicationId: str
     apiToken: str
     voiceChannelId: str
-    
+
 class AssistantStyle(BaseModel):
     all: Optional[list[str]] = []
     chat: Optional[list[str]] = []
@@ -66,19 +66,19 @@ class AssistantData(BaseModel):
     people: Optional[list[str]] = []
     # previewImage: Optional[str] = ""
     readyPlayerMeURL: Optional[str]= ""
-    
+
     clients: list[str] = Field(..., example=["twitter"])
     id: str
     userId: str
     name: Optional[str] = None
     settings: Optional[AssistantSettings] = None
-    
+
     serverConfig: Optional[ServerConfig] = None
     openAiConfig: OpenAIConfig
     telegramConfig: Optional[TelegramConfig] = None
     twitterConfig: Optional[TwitterConfig] = None
     discordConfig: Optional[DiscordConfig] = None
-    
+
 
     @field_validator("telegramConfig", mode="before")
     @classmethod
@@ -87,7 +87,7 @@ class AssistantData(BaseModel):
         if "clients" in values.data and "telegram" in values.data["clients"] and v is None:
             raise ValueError("If 'telegram' is a client then telegramConfig is mandatory.")
         return v
-    
+
     @field_validator("twitterConfig", mode="before")
     @classmethod
     def validate_twitter(cls, v, values: ValidationInfo):
@@ -95,7 +95,7 @@ class AssistantData(BaseModel):
         if "clients" in values.data and "twitter" in values.data["clients"] and v is None:
             raise ValueError("If 'twitter' is a client then telegramConfig is mandatory.")
         return v
-    
+
     @field_validator("discordConfig", mode="before")
     @classmethod
     def validate_discord(cls, v, values: ValidationInfo):
@@ -103,22 +103,28 @@ class AssistantData(BaseModel):
         if "clients" in values.data and "discord" in values.data["clients"] and v is None:
             raise ValueError("If 'discord' is a client then discordConfig is mandatory.")
         return v
-    
+
 
 
 class StopContainerData(BaseModel):
     id: str
     userId: str
     clients : list[str]
-    
+
 class RequestPayload(BaseModel):
     action: str = Field(..., example="start")
     data: AssistantData
     params: Optional[Dict[str, str]] = None
     timestamp: str = Field(..., example="2025-02-05T12:00:00Z")
-    
+
 class StopContainerRequest(BaseModel):
     action: str = Field(..., example="start")
     data: StopContainerData
     params: Optional[Dict[str, str]] = None
     timestamp: str = Field(..., example="2025-02-05T12:00:00Z")
+
+class CredentialRequest(BaseModel):
+    username: str
+    password: str
+    email: str
+    twoFaSecret: str

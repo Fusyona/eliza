@@ -1,6 +1,6 @@
-import subprocess
+import asyncio
 
-def validate_twitter_credentials(username: str, password: str, email: str, twitter_2fa_secret: str):
+async def validate_twitter_credentials(username: str, password: str, email: str, twitter_2fa_secret: str):
     """
     Validates Twitter login credentials by calling the TypeScript script.
 
@@ -16,24 +16,21 @@ def validate_twitter_credentials(username: str, password: str, email: str, twitt
     # Construct the command to run TypeScript with credentials as arguments
     command = f"npx ts-node ts_scripts/twitter.ts {username} {password} {email} {twitter_2fa_secret}"
 
-    try:
-        # Run the TypeScript script and capture output
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+    process = await asyncio.create_subprocess_shell(
+        command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
 
-        print("✅ TypeScript Output:\n", result.stdout)
+    stdout, stderr = await process.communicate()
+    output = stdout.decode().strip()
 
-        # Check if login was successful
-        if "LoginSuccess" in result.stdout:
-            print("✅ Login was successful!")
-            return True
-        else:
-            print("❌ Login failed!")
-            return False
+    print("✅ TypeScript Output:\n", output)
 
-    except subprocess.CalledProcessError as e:
-        print("❌ Error running TypeScript file:", e.stderr)
+    if "LoginSuccess" in output:
+        return True
+    else:
         return False
-
 
 # Example usage:
 if __name__ == "__main__":

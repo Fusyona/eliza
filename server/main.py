@@ -3,11 +3,12 @@ import subprocess
 from fastapi.exceptions import RequestValidationError
 import docker
 import data_mapper
-from validators import RequestPayload, StopContainerRequest
+from validators import RequestPayload, StopContainerRequest, CredentialRequest
 import os
 import logging
 import json
 from starlette.responses import JSONResponse
+from credentials_validation import validate_twitter_credentials
 
 app = FastAPI()
 client = docker.from_env()
@@ -157,3 +158,25 @@ def get_container_status(container_name: str) -> str:
     except Exception as e:
         logger.error(f"🔥 Error checking container status: {str(e)}")
         return "error"
+
+@app.post("/validate-credentials/")
+async def validate_credentials(credentials: CredentialRequest):
+    """
+    Endpoint to validate Twitter credentials.
+    Calls validate_twitter_credentials from credentials_validation.py.
+    """
+    try:
+        success = await validate_twitter_credentials(
+            credentials.username,
+            credentials.password,
+            credentials.email,
+            credentials.twoFaSecret
+        )
+
+        if success:
+            return {"message": "✅ Login successful!"}
+        else:
+            raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
