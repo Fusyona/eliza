@@ -1,46 +1,45 @@
 import { Scraper } from "agent-twitter-client";
 
+// Get credentials from command-line arguments
+const args = process.argv.slice(2);
+if (args.length < 4) {
+    console.error("❌ Error: Missing arguments. Usage: ts-node twitter.ts <username> <password> <email> <2fa_secret>");
+    process.exit(1);
+}
+
+const [username, password, email, twitter2faSecret] = args;
+
 var twitterClient = new Scraper();
-var username = "AnitaTentation";
-var password = "nonlucrativeaccount123*";
-var email = "dbytestingemail@gmail.com";
-var twitter2faSecret = "DCQA23ESULMED5ZT";
 
 async function main() {
+    console.log("Hello, TypeScript!");
 
-        console.log("Hello, TypeScript!");
-        var retries = 5;
-        while (retries > 0) {
-            try {
+    var retries = 5;
+    while (retries > 0) {
+        try {
             if (await twitterClient.isLoggedIn()) {
                 console.log("Already logged in!");
                 console.log("LoginSuccess");
                 process.exit(0);
-                break;
             } else {
-                await twitterClient.login(
-                    username,
-                    password,
-                    email,
-                    twitter2faSecret
-                    );
-                    if (await twitterClient.isLoggedIn()) {  
-                        console.log("Logged successfully!");
-                        console.log("LoginSuccess");
-                        process.exit(0);
-                    }
+                await twitterClient.login(username, password, email, twitter2faSecret);
+                if (await twitterClient.isLoggedIn()) {
+                    console.log("Logged successfully!");
+                    console.log("LoginSuccess");
+                    process.exit(0);
                 }
-            } catch (error) {
-                console.log(`Login attempt failed: ${error.message}`)
-                
             }
-            retries--;
+        } catch (error) {
+            console.log(`Login attempt failed: ${error.message}`);
         }
-        console.log("LoginFailure"); // ❌ Failure message
-        process.exit(1);
+        retries--;
     }
-    main().catch((err) => {
-        console.error("Unexpected error:", err);
-        console.log("LoginFailure"); // Ensure Python gets a failure message
-        process.exit(1);
-    });
+    console.log("LoginFailure"); // ❌ Failure message
+    process.exit(1);
+}
+
+main().catch((err) => {
+    console.error("Unexpected error:", err);
+    console.log("LoginFailure");
+    process.exit(1);
+});
