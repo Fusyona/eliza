@@ -165,6 +165,8 @@ async def validate_credentials(credentials: CredentialRequest):
     Endpoint to validate Twitter credentials.
     Calls validate_twitter_credentials from credentials_validation.py.
     """
+
+    logger.info(f"📩 Received request to validate the credentials for user: {credentials.username}")
     try:
         success = await validate_twitter_credentials(
             credentials.username,

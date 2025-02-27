@@ -3,7 +3,7 @@ import { Scraper } from "agent-twitter-client";
 // Get credentials from command-line arguments
 const args = process.argv.slice(2);
 if (args.length < 4) {
-    console.error("❌ Error: Missing arguments. Usage: ts-node twitter.ts <username> <password> <email> <2fa_secret>");
+    console.error("❌ Error: Missing arguments. Usage: npx ts-node twitter.ts <username> <password> <email> <2fa_secret>");
     process.exit(1);
 }
 
@@ -12,7 +12,6 @@ const [username, password, email, twitter2faSecret] = args;
 var twitterClient = new Scraper();
 
 async function main() {
-    console.log("Hello, TypeScript!");
 
     var retries = 5;
     while (retries > 0) {

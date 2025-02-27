@@ -1,4 +1,33 @@
 import asyncio
+import httpx
+
+async def is_valid_telegram_token(bot_token: str) -> bool:
+    """
+    Checks if a given Telegram bot token is valid.
+
+    Parameters:
+        bot_token (str): The Telegram bot token to test.
+
+    Returns:
+        bool: True if the token is valid, False otherwise.
+    """
+    url = f"https://api.telegram.org/bot{bot_token}/getMe"
+
+    try:
+        async with httpx.AsyncClient(timeout = 10) as client:
+            response = await client.get(url)
+            data = response.json()
+
+            if data.get("ok"):
+                print(f"✅ Valid token! Bot Info: {data['result']}")
+                return True
+            else:
+                print("❌ Invalid token!")
+                return False
+    except httpx.RequestError as e:
+        print(f"❌ Error connecting to Telegram API: {e}")
+        return False
+
 
 async def validate_twitter_credentials(username: str, password: str, email: str, twitter_2fa_secret: str):
     """
@@ -34,11 +63,13 @@ async def validate_twitter_credentials(username: str, password: str, email: str,
 
 # Example usage:
 if __name__ == "__main__":
-    success = validate_twitter_credentials(
-        "AnitaTentation",
-        "nonlucrativeaccount123*",
-        "dbytestingemail@gmail.com",
-        "DCQA23ESULMED5ZT"
-    )
+    # success = asyncio.run(validate_twitter_credentials(
+    #     "AnitaTentation",
+    #     "nonlucrativeaccount123*",
+    #     "dbytestingemail@gmail.com",
+    #     "DCQA23ESULMED5ZT"
+    # ))
+    bot_token = "7544920074:AAEi1LO6jvAVdvhN8DSwAsqWmvNsQCdatF41"
+    success = asyncio.run(is_valid_telegram_token(bot_token))
 
     print("🔹 Login Result:", "✅ Success" if success else "❌ Failed")
