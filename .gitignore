@@ -59,3 +59,6 @@ agent/content
 /server/__pycache__/main.cpython-310.pyc
 /server/__pycache__/validators.cpython-310.pyc
 /server/venv/
+server/validators.py
+server/__pycache__/main.cpython-313.pyc
+server/__pycache__/validators.cpython-313.pyc
