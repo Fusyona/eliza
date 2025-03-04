@@ -8,7 +8,7 @@ import os
 import logging
 import json
 from starlette.responses import JSONResponse
-from credentials_validation import validate_twitter_credentials, is_valid_telegram_token
+from credentials_validation import validate_twitter_credentials, is_valid_telegram_token, verify_discord_credentials
 
 app = FastAPI()
 client = docker.from_env()
@@ -192,6 +192,21 @@ async def validate_credentials(request: CredentialRequest):
             credentials = request.telegramConfig
             success = await is_valid_telegram_token(
                 credentials.botToken,
+            )
+
+            if success:
+                return {"message": "✅ Validation successful!"}
+            else:
+                raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
+    if "discord" in request.clients:
+        try:
+            print(request)
+            credentials = request.discordConfig
+            success = await verify_discord_credentials(
+                credentials.apiToken, credentials.applicationId
             )
 
             if success:

@@ -55,6 +55,7 @@ coverage
 
 agent/content
 /server/server.log
+/server/__pycache__/
 /server/__pycache__/data_mapper.cpython-310.pyc
 /server/__pycache__/main.cpython-310.pyc
 /server/__pycache__/validators.cpython-310.pyc

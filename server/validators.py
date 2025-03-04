@@ -45,7 +45,7 @@ class TwitterConfig(BaseModel):
 class DiscordConfig(BaseModel):
     applicationId: str
     apiToken: str
-    voiceChannelId: str
+    voiceChannelId: Optional[str] = None
 
 class AssistantStyle(BaseModel):
     all: Optional[list[str]] = []
@@ -127,6 +127,7 @@ class CredentialRequest(BaseModel):
     clients: list[str]
     telegramConfig: Optional[TelegramConfig] = None
     twitterConfig: Optional[TwitterCredentials] = None
+    discordConfig: Optional[DiscordConfig] = None
 
     @field_validator("telegramConfig", mode="before")
     @classmethod
@@ -144,10 +145,10 @@ class CredentialRequest(BaseModel):
             raise ValueError("If 'twitter' is a client then twitterConfig is mandatory.")
         return v
 
-    # @field_validator("discordConfig", mode="before")
-    # @classmethod
-    # def validate_discord(cls, v, values: ValidationInfo):
-    #     """If 'discord' is a client then discordConfig is mandatory"""
-    #     if "clients" in values.data and "discord" in values.data["clients"] and v is None:
-    #         raise ValueError("If 'discord' is a client then discordConfig is mandatory.")
-    #     return v
+    @field_validator("discordConfig", mode="before")
+    @classmethod
+    def validate_discord(cls, v, values: ValidationInfo):
+        """If 'discord' is a client then discordConfig is mandatory"""
+        if "clients" in values.data and "discord" in values.data["clients"] and v is None:
+            raise ValueError("If 'discord' is a client then discordConfig is mandatory.")
+        return v
