@@ -8,7 +8,7 @@ import os
 import logging
 import json
 from starlette.responses import JSONResponse
-from credentials_validation import validate_twitter_credentials
+from credentials_validation import validate_twitter_credentials, is_valid_telegram_token, verify_discord_credentials
 
 app = FastAPI()
 client = docker.from_env()
@@ -160,23 +160,59 @@ def get_container_status(container_name: str) -> str:
         return "error"
 
 @app.post("/validate-credentials/")
-async def validate_credentials(credentials: CredentialRequest):
+async def validate_credentials(request: CredentialRequest):
     """
     Endpoint to validate Twitter credentials.
     Calls validate_twitter_credentials from credentials_validation.py.
     """
-    try:
-        success = await validate_twitter_credentials(
-            credentials.username,
-            credentials.password,
-            credentials.email,
-            credentials.twoFaSecret
-        )
 
-        if success:
-            return {"message": "✅ Login successful!"}
-        else:
-            raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+    logger.info(f"📩 Received request to validate the credentials for: {request.clients}")
+    print(f"📩 Received request to validate the credentials for: {request.clients}")
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
+    if "twitter" in request.clients:
+        try:
+            credentials = request.twitterConfig
+            success = await validate_twitter_credentials(
+                credentials.username,
+                credentials.password,
+                credentials.email,
+                credentials.twoFaSecret
+            )
+
+            if success:
+                return {"message": "✅ Login successful!"}
+            else:
+                raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
+    if "telegram" in request.clients:
+        try:
+            print(request)
+            credentials = request.telegramConfig
+            success = await is_valid_telegram_token(
+                credentials.botToken,
+            )
+
+            if success:
+                return {"message": "✅ Validation successful!"}
+            else:
+                raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
+    if "discord" in request.clients:
+        try:
+            print(request)
+            credentials = request.discordConfig
+            success = await verify_discord_credentials(
+                credentials.apiToken, credentials.applicationId
+            )
+
+            if success:
+                return {"message": "✅ Validation successful!"}
+            else:
+                raise HTTPException(status_code=401, detail="❌ Invalid credentials.")
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"❌ Internal Server Error: {str(e)}")
